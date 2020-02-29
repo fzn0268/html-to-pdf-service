@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Html to PDF conversion service
+  description: This is a server for conversion from html to pdf via Puppeteer.
+  termsOfService: http://example.com/terms/
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+  version: 0.0.1
+servers:
+- url: /
+paths:
+  /v1/conversion/from/html/to/pdf:
+    post:
+      description: Convert html to pdf
+      operationId: v1ConversionFromHtmlToPdfPOST
+      requestBody:
+        description: Conversion parameter
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversionParam'
+        required: true
+      responses:
+        "200":
+          description: Finish conversion
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+                x-content-type: application/pdf
+        "500":
+          description: Error on converting
+      x-swagger-router-controller: Default
+components:
+  schemas:
+    PuppeteerPdfOptions:
+      type: object
+      properties:
+        scale:
+          type: number
+          description: Scale of the webpage rendering. Defaults to 1. Scale amount
+            must be between 0.1 and 2.
+          default: 1
+        displayHeaderFooter:
+          type: boolean
+          description: Display header and footer.
+          default: false
+        headerTemplate:
+          type: string
+          description: |
+            'HTML template for the print header. Should be valid
+            HTML markup with following classes used to inject
+            printing values into them:_
+
+            date formatted print date
+
+            title document title
+
+            url document location
+
+            pageNumber current page number
+
+            totalPages total pages in the document'
+        footerTemplate:
+          type: string
+          description: HTML template for the print footer. Should use the same format
+            as the headerTemplate.
+        printBackground:
+          type: boolean
+          description: Print background graphics. Defaults to false.
+          default: false
+        landscape:
+          type: boolean
+          description: Paper orientation.
+          default: false
+        pageRanges:
+          type: string
+          description: Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the
+            empty string, which means print all pages.
+          default: ""
+        format:
+          type: string
+          description: Paper format. If set, takes priority over width or height options.
+          default: Letter
+        width:
+          description: Paper width, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+        height:
+          description: Paper height, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+        margin:
+          $ref: '#/components/schemas/PuppeteerPdfOptions_margin'
+        preferCSSPageSize:
+          type: boolean
+          description: Give any CSS @page size declared in the page priority over
+            what is declared in width and height or format options. Defaults to false,
+            which will scale the content to fit the paper size.
+          default: false
+      description: Puppeteer pdf conversion options
+    ConversionParam:
+      type: object
+      properties:
+        htmlString:
+          type: string
+          description: String of html
+        options:
+          $ref: '#/components/schemas/PuppeteerPdfOptions'
+      description: Html to PDF conversion parameter
+    PuppeteerPdfOptions_margin:
+      type: object
+      properties:
+        top:
+          description: Top margin, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+        right:
+          description: Right margin, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+        bottom:
+          description: Bottom margin, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+        left:
+          description: Left margin, accepts values labeled with units.
+          oneOf:
+          - type: number
+          - type: string
+      description: Paper margins, defaults to none.

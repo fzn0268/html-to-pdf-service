@@ -1,0 +1,24 @@
+{
+  "name": "html-to-pdf-conversion-service",
+  "version": "0.0.1",
+  "description": "This is a server for conversion from html to pdf via Puppeteer.",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "js-yaml": "^3.3.0",
+    "oas3-tools": "^2.0.2",
+    "uuid": "^7.0.1"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^2.1.1"
+  }
+}
