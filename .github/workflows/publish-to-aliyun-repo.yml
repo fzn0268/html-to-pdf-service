@@ -32,7 +32,7 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=registry.cn-hangzhou.aliyuncs.com/$NAMESPACE/${{ github.repository }}
+          IMAGE_ID=registry.cn-hangzhou.aliyuncs.com/$NAMESPACE/$(echo "${{ github.repository }}" | sed -e 's,"${ github.actor }/",,')
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           # Strip "v" prefix from tag name
