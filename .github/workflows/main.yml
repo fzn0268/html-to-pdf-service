@@ -1,0 +1,45 @@
+name: Docker publish to aliyun
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  pull_request:
+
+env:
+  # TODO: Change variable to your image's name.
+  NAMESPACE: fzn0268-pub
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file Dockerfile.alpine --tag image
+
+      - name: Log into registry
+        run: echo "${{ secrets.PW_ALIYUN_DOCKER_IMAGE_REPO }}" | docker login --username=fzn0268@hotmail.com registry.cn-hangzhou.aliyuncs.com --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=registry.cn-hangzhou.aliyuncs.com/$NAMESPACE/${{ github.repository }}
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
