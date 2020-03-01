@@ -26,12 +26,18 @@ exports.v1ConversionFromHtmlToPdfPOST = function(body) {
       console.info(tmpFileFullPath + ' saved');
     });
 
+    const launcherOpts = {
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    };
+    if (process.env.OS_DIST === 'alpine') {
+      launcherOpts.executablePath = '/usr/bin/chromium-browser';
+      launcherOpts.args.unshift('--disable-dev-shm-usage')
+    }
+
     try {
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+      const browser = await puppeteer.launch(launcherOpts);
       const page = await browser.newPage();
-      await page.goto('file://' + tmpFileFullPath, {waitUntil: 'networkidle2'});
+      await page.goto('file://' + tmpFileFullPath, {waitUntil: 'networkidle0'});
       const options = body.options || {format: 'A4'};
       await page.pdf(options).then(value => {
         resolve(value);
@@ -46,5 +52,5 @@ exports.v1ConversionFromHtmlToPdfPOST = function(body) {
       reject(e);
     }
   });
-}
+};
 

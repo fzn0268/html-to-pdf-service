@@ -1,0 +1,51 @@
+FROM alpine:3.11
+
+# Installs latest Chromium (79), node.js (13) package.
+RUN apk add --no-cache \
+      dumb-init \
+      chromium \
+      nss \
+      freetype \
+      freetype-dev \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      nodejs \
+      yarn \
+      curl; \
+    curl -LO https://github.com/wang-tf/Chinese_OCR_synthetic_data/raw/master/fonts/STSONG.TTF; \
+    chmod 644 STSONG.TTF; \
+    mv STSONG.TTF /usr/share/fonts; \
+    fc-cache -fv; \
+    apk del curl
+
+# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# Puppeteer v2.0.0 works with Chromium 79.
+RUN yarn add puppeteer@2.0.0
+
+# Add user so we don't need --no-sandbox.
+RUN addgroup -S pptruser && adduser -S -g pptruser pptruser \
+    && mkdir -p /home/pptruser/Downloads /app \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser /app
+
+# Run everything after as non-privileged user.
+USER pptruser
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN yarn --prod
+
+COPY . .
+
+EXPOSE 8080
+
+ENV OS_DIST=alpine
+
+ENTRYPOINT ["dumb-init", "--"]
+
+CMD ["node", "index.js"]
